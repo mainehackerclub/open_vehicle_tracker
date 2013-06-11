@@ -1,95 +1,16 @@
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
-  font-weight: 300;
+#map_canvas img {
+  max-width: none;
 }
 
-ul, li, dd{
-  margin: 0;
-  padding: 0;
+#map_canvas label {
+  width: auto;
+  display: inline;
 }
 
-#map-canvas{
-  height: 100%;
-  width: 100%;
-  float: left;
+.container-fluid {
+  background-color: gray;
 }
 
-.glass{
-  filter: alpha(opacity=92);
-  -moz-opacity: 0.92;
-  -khtml-opacity: 0.92;
-  opacity: 0.92;
+.span3 {
+  background-color: blue;
 }
-
-#info-panel-border{
-  border: 1px solid white;
-  right: 3%;
-  float: right;
-  /*height: 374px;*/
-  height: auto;
-  width: 300px;
-  margin: 5% 0 0 0;
-  position: absolute;
-}
-
-#info-panel-border.hidden {
-  -webkit-transform: translate(300px,0px);
-}
-
-#info-panel{
-  background-color: white;
-  border: 2px dotted #E9E9E9;
-  /*height: 370px;*/
-  height: auto;
-}
-
-.panel:after {
-    width: 260px;
-    clear: both;
-    display:inline;
-}
-
-.panel{
-  width: 286px;
-  height: 30px;
-  padding-left: 10px;
-  background-color: #E9E9E9;
-  list-style-type: none;
-
-  /* Internet Explorer 10 */
-  display:-ms-flexbox;
-  -ms-flex-align:center;
-
-  /* Firefox */
-  display:-moz-box;
-  -moz-box-align:center;
-
-  /* Safari, Opera, and Chrome */
-  display:-webkit-box;
-  -webkit-box-align:center;
-
-  /* W3C */
-  display:box;
-  box-align:center;
-}
-.panel-content li{
-  list-style-type: none;
-  padding-left: 20px;
-  background-color: #E9E9E9;
-}
-
-.accordion{
-  margin: 0px;
-
-}
-
-.accordion a{
-  display: block;
-  color: black;
-  font-weight: bold;
-  text-decoration: none;
-}
-

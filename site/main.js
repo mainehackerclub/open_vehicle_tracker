@@ -36,28 +36,34 @@ function getTruck(truck) {
 var geocoder = null;
 var infowindow = new google.maps.InfoWindow();
 //var marker = null;
-function initialize() {
-geocoder = new google.maps.Geocoder();
-var mapOptions = {
-  zoom: 12,
-  center: new google.maps.LatLng(44.801207, -68.777817),
-  disableDefaultUI: true,
-  mapTypeId: google.maps.MapTypeId.ROADMAP
-};
+function initialize_map() {
+  geocoder = new google.maps.Geocoder();
+  var map_canvas = document.getElementById('map_canvas');
+  //map_canvas.style.height = $(window).height();
+  $('#map_canvas').css('height', ($(window).height()));
+  
+  var mapOptions = {
+    zoom: 12,
+    center: new google.maps.LatLng(44.801207, -68.777817),
+    disableDefaultUI: true,
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  };
 
-window.map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-markers.push = new google.maps.Marker({
-  /*icon: new google.maps.MarkerImage('noun_project_4247.svg',
-    null, null, null, new google.maps.Size(64,64)),*/
-  map: map
-});
+  window.map = new google.maps.Map(map_canvas, mapOptions);
+  markers.push = new google.maps.Marker({
+    /*icon: new google.maps.MarkerImage('noun_project_4247.svg',
+      null, null, null, new google.maps.Size(64,64)),*/
+    map: map
+  });
+
+
+  google.maps.event.trigger(map, 'resize');
 }
+
 function in_circle(center_x, center_y, radius, x, y){
 square_dist = (center_x - x) ^ 2 + (center_y - y) ^ 2
 return (square_dist <= (radius ^ 2))
 }
-
-console.log(in_circle(44.801207,-68.777817,0.000100,0,0));
 
 function latLongAddress(latLng, id) {
    geocoder.geocode({
@@ -133,12 +139,19 @@ function map_points() {
            map_points();
        }, 3000);
 }
-//map_points();
 
-
-window.onload = function(){
+function initialize () {
  //while(google.maps.geometry){
-  initialize();
+  initialize_map();
   map_points();
+  google.maps.event.trigger(map, 'resize');
 }
 
+$(window).resize(function () {
+      var h = $(window).height(),
+        offsetTop = 5; // Calculate the top offset
+
+    $('#map_canvas').css('height', (h - offsetTop));
+}).resize();
+
+google.maps.event.addDomListener(window, 'load', initialize);
