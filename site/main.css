@@ -7,10 +7,23 @@
   display: inline;
 }
 
-.container-fluid {
+.row-fluid {
   background-color: gray;
 }
 
+.vehicle_list { 
+  background-color: whitesmoke;
+  border-radius: 10px;
+}
+
 .span3 {
-  background-color: blue;
+  border-radius: 10px;
+  padding: 5px;
+}
+
+.my_sidebar {
+  border-radius: 10px;
+  background-color: lightgray;
+  border-radius: 10px;
+  padding: 5px;
 }

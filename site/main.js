@@ -41,6 +41,8 @@ function initialize_map() {
   var map_canvas = document.getElementById('map_canvas');
   //map_canvas.style.height = $(window).height();
   $('#map_canvas').css('height', ($(window).height()));
+  $('.my_sidebar').css('height', ($(window).height() - 20));
+
   
   var mapOptions = {
     zoom: 12,

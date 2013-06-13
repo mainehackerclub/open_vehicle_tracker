@@ -16,10 +16,12 @@ ini_set('display_errors',"On");
     <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
   </head>
   <body>
-    <div class="container-fluid">
+<!--    <div class="container-fluid"> -->
     <div class="row-fluid">
       <div class="span3">
+        <div class="my_sidebar">
        <!-- <div class="well sidebar-nav"> -->
+        <div class="vehicle_list">
             <?php 
             $dbconn = pg_connect( 'host=localhost port=5432 dbname=matador user=plow password=notverysecure' );
             $q = "SELECT type FROM vehicles GROUP BY type";
@@ -27,7 +29,7 @@ ini_set('display_errors',"On");
             foreach($result as $r){
               $collapsible_string = str_replace(' ', '_', $r['type']);
             ?>
-              <a href="#" id=<?php echo $r['type'] ?> data-toggle="collapse" class="active" data-target="#collapsible_<?php echo $collapsible_string; ?>"></i><?php echo $r['type'] ?></a>
+              <a href="#" id=<?php echo $r['type'] ?> data-toggle="collapse" class="accordion-body collapse" data-target="#collapsible_<?php echo $collapsible_string; ?>"></i><?php echo $r['type'] ?></a>
               <div id="collapsible_<?php echo $collapsible_string ?>" class="collapse in">
               <ul class="nav nav-list">
               <?php
@@ -42,13 +44,15 @@ ini_set('display_errors',"On");
               </ul>
             </div>
           <?php } ?>
+          </div>
+          </div>
 <!--        </div> -->
       </div>
       <div class="span9">
         <div id="map_canvas" ></div>
       </div>
     </div>
-    </div>
+<!--    </div> -->
   <script>
     function checkEvent(){
       if(document.getElementByClassName(this.class).checked){
