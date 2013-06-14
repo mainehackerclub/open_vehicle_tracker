@@ -14,9 +14,9 @@ if(isset($_GET['vehicleid']) && !empty($_GET['vehicleid']))
   $q .= " AND vehicle_id = '". pg_escape_string($_GET['vehicleid']) ."'";
 $q .= " AND (lat != 0 AND lon != 0)";
 if(isset($_GET['vehicleid']) && !empty($_GET['vehicleid'])){
-  $q .= " ORDER BY time DESC LIMIT 1";
+  $q .= " ORDER BY date DESC, time DESC LIMIT 1";
 } else {
-  $q .= ' ORDER BY time ASC';
+  $q .= ' ORDER BY date ACS, time ASC';
 }
 $result = pg_fetch_all( pg_query( $dbconn, $q ) );
 
