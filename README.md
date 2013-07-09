@@ -5,18 +5,35 @@ An open source solution to both the hardware and software aspects of tracking a 
 
 About
 -----
-On June 1st & 2nd we organized, and participated in, a hack-a-thon, one of many across the nation.  The purpose of these code sprints were to create open source civic applications which would improve communities on both a macro and micro scale.  
-
-Our team's project focused on an open source solution for tracking vehicles through GPS devices.  Originally our idea was specifically catered to capturing data from snow plow trucks, but myriad uses have been realised since conception.  Our project has two aspects: hardware and software, both created with open source materials.  
+This project was started at [Maine Civic Hack Day 2013](http://mainecivichackday.com), which was part of the [National Day of Civic Hacking](http://hackforchange.org)
 
 Hardware
 --------
-Our hardware is comprised of an Arduino microprocessor with a ethernet shield and a GPS shield.  Once programmed, the board provides real time updates of GPS coordinates to a server.  The advantage of using open source hardware in this case is minimum cost and maximum extensibility.  The device transmits data to the server via a cellular network, currently through an actual cell phone.  However with an alternate shield that provides both GPS and cellular functionality the rig becomes standalone.  The estimated cost of this multi tiered device is only $100.
 
+Using open source hardware for minimum cost and maximum extensibility, The board provides real time updates of GPS coordinates to a server.  
+
+####Prototype v0.0.1
+
+  * Arduino UNO
+  * Ethernet shield
+  * GPS shield.  
+  * Using GPRS internet connection, via Ethernet
+  * Cost: ~$100.
 
 Software
 --------
-The software application is a virtual private server that hosts a site running on nginx and, as discussed previously, receives these data from the Arduino via a cellular network.  Data is stored in a postgres database and then displayed in (near) real time on a web map using the Google Maps API v3.  Since we realised the potential to expand the service to a variety of vehicles, we are able to dynamically view different classes of vehicles (snow plow trucks, recycle trucks, street-sweepers, and even city busses have been imagined within the system).  Additional information can also be accessed from the hardware unit.  For example: data from a snow plow might include whether or not the plow is down and the amount of sand and salt it's dispersing.  Speed can also be calculated and monitored.
+
+####Web Server
+
+  * Nginx
+  * Postgres database 
+  * Google Maps API v3.
+  * PHP
+  * jQuery
+
+#### HTTP API
+
+   * Documentation & Code samples at [docs.openvehicletracker.apiary.io](http://docs.openvehicletracker.apiary.io)
 
 Installation
 ------------
