@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Maine Hacker Club - JohnnySocket</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="src/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="lib/style.css"/>
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+    </style>
+    <link href="src/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="src/bootstrap/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="src/bootstrap/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="src/bootstrap/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="src/bootstrap/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="src/bootstrap/ico/apple-touch-icon-57-precomposed.png">
+  </head>
+
+  <body>
+    <a href="https://github.com/mainehackerclub/johnnysocket"><img style="position: absolute; top: 0; right: 0; border: 0;" src="img/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    <div class="navbar navbar-inverse navbar-fixed-top" id="hackerclub_navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="#">JohnnySocket</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <!-- Main hero unit for a primary marketing message or call to action -->
+      <div class="hero-unit">
+        <center><img src="img/Header.jpg" class="img-rounded" id="johnny_header"></center>
+        <h1>Arduino Over The Interwebs</h1>
+        <p>
+          This project is an effort to explore using the browser as an interface to controlled remote hardware.
+        </p>
+      </div>
+
+      <!-- Example row of columns -->
+      <div class="row">
+        <div class="span4">
+          <h2>Johnny-Five</h2>
+          <p>Use the <a href="https://github.com/rwldrn/johnny-five">Johnny-Five</a> Node.js module to control your arduino board.  The node server will run on a PC of RaspberryPi connected to the arduino via USB.</p>
+        </div>
+        <div class="span4">
+          <h2>TCP</h2>
+          <p>Use <a href="http://nodejs.org">Node's</a> built in <a href="http://nodejs.org/api/net.html#net_net">TCP module</a> to connect your local Johnny-Five instance to the webserver.</p>
+       </div>
+        <div class="span4">
+          <h2>Socket.io</h2>
+          <p>Use <a href="http://socket.io/">socket.io</a> to hook button clicks on a webpage into events that your webserver can transmit to your Johnny-Five instance via TCP.</p>
+        </div>
+      </div>
+
+      <hr>
+
+      <footer>
+        <p>&copy; Maine Hacker Club 2012-2013. MIT license.</p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="src/jquery/jquery-1.8.1.min.js"></script>
+    <script src="src/bootstrap/js/bootstrap.min.js"></script>
+  </body>
+</html>
