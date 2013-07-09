@@ -1,6 +1,7 @@
 Open Vehicle Tracker
 ====================
 An open source solution to both the hardware and software aspects of tracking a vehicle in real-time.
+[http://mainehackerclub.github.io/open_vehicle_tracker/](http://mainehackerclub.github.io/open_vehicle_tracker/)
 
 About
 -----
