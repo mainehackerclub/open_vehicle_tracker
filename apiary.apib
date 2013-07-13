@@ -1,0 +1,86 @@
+HOST: http://www.openvehicletracker.org/
+
+--- OpenVehicleTracker ---
+
+---
+Welcome to the OpenVehicleTracker API documentation.
+Visit our [project page](http://mainehackerclub.github.io/open_vehicle_tracker)
+---
+
+
+-- Organization Resources --
+
+Create a new Organization
+POST /organization
+> Content-Type: application/json
+{ "name":"MuniBus"}
+< 201
+< Content-Type: application/json
+{ "status": "created"}
+
+Retrieve an Organization
+GET /organization/{?name}
+> Content-Type: application/json
+< 201
+< Content-Type: application/json
+{ "id": "1234", "name":"MuniBus"}
+
+-- Fleet Resources --
+
+Create a new Fleet
+POST /{organization}/fleet
+> Content-Type: application/json
+{ "name":"SnowPlows"}
+< 201
+< Content-Type: application/json
+{ "status": "created"}
+
+Retrieve a Fleet
+GET /{organization}/fleet/{?name}
+> Content-Type: application/json
+< 201
+< Content-Type: application/json
+{ "id": "2345", "name":"SnowPlows"}
+
+
+-- Vehicle Resources --
+
+Create a new Vehicle
+POST /{organization}/{fleet}/vehicle
+> Content-Type: application/json
+{ "name":"PlowTruckAlpha"}
+< 201
+< Content-Type: application/json
+{ "status": "created"}
+
+Retrieve a Vehicle
+GET /{organization}/{fleet}/vehicle/{?name}
+> Content-Type: application/json
+< 201
+< Content-Type: application/json
+{ "id": "3456", "name":"PlowTruckAlpha", "fleet":"SnowPlows" }
+
+-- Location Series Resources --
+
+Add location history for a vehicle
+POST /{organization}/{fleet}/vehicle/location
+> Content-Type: application/json
+{ "time":"20130602 15:00:00.000000 -0400s", 
+"vehicleId":"3456", "latitude":"44.802935", "longitude": "-68.77051", "satellites":"4"  }
+< 201
+< Content-Type: application/json
+{ "status": "logged"}
+
+Retrieve location history for a vehicle
+GET /{organization}/{fleet}/{vehicle}/location/{?start,end}
+> Content-Type: application/json
+< 201
+< Content-Type: application/json
+{ points:[
+    {"time":"20130602 15:00:00.000000 -0400s", "vehicleId":"3456", "latitude":"44.802935", "longitude": "-68.77051", "satellites":"4" }
+    {"time":"20130602 15:00:02.000000 -0400s", "vehicleId":"3456", "latitude":"44.802940", "longitude": "-68.77053", "satellites":"4" }
+    {"time":"20130602 15:00:04.000000 -0400s", "vehicleId":"3456", "latitude":"44.802945", "longitude": "-68.77055", "satellites":"4" }
+]}
+
+
+
