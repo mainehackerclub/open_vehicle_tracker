@@ -1,10 +1,9 @@
-#include <Adafruit_CC3000.h>
-#include <ccspi.h>
+#include <Adafruit_CC3000.h>	// https://github.com/adafruit/Adafruit_CC3000_Library
+#include <Adafruit_GPS.h>		// https://github.com/adafruit/Adafruit-GPS-Library
 #include <SPI.h>
 #include <string.h>
-#include "utility/debug.h"
+#include "utility/debug.h"		// This should be in Adafruit_CC3000 library
 
-#include <Adafruit_GPS.h>
 #if ARDUINO >= 100
  #include <SoftwareSerial.h>
 #else
@@ -42,6 +41,16 @@ void useInterrupt(boolean v) {
 // Set GPSECHO to 'false' to turn off echoing the GPS data to the Serial console
 // Set to 'true' if you want to debug and listen to the raw GPS sentences
 #define GPSECHO  true
+
+// Interrupt is called once a millisecond, looks for any new GPS data, and stores it
+SIGNAL(TIMER0_COMPA_vect) {
+  char c = GPS.read();
+  // if you want to debug, this is a good time to do it!
+  if (GPSECHO)
+    if (c) UDR0 = c;  
+    // writing direct to UDR0 is much much faster than Serial.print 
+    // but only one character can be written at a time. 
+}
 
 // These are the interrupt and control pins
 #define ADAFRUIT_CC3000_IRQ   3  // MUST be an interrupt pin!
@@ -166,7 +175,7 @@ void setup(void)
   // the nice thing about this code is you can have a timer0 interrupt go off
   // every 1 millisecond, and read data from the GPS for you. that makes the
   // loop code a heck of a lot easier!
-  useInterrupt(false);
+  useInterrupt(true);
   Serial.println("GPS 3");
   
   delay(1000);
