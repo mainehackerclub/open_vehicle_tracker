@@ -20,37 +20,11 @@
 #endif
 Adafruit_GPS GPS(&mySerial);
 
-// this keeps track of whether we're using the interrupt
-// off by default!
-boolean usingInterrupt = false;
-
-void useInterrupt(boolean v) {
-  if (v) {
-    // Timer0 is already used for millis() - we'll just interrupt somewhere
-    // in the middle and call the "Compare A" function above
-    OCR0A = 0xAF;
-    TIMSK0 |= _BV(OCIE0A);
-    usingInterrupt = true;
-  } else {
-    // do not call the interrupt function COMPA anymore
-    TIMSK0 &= ~_BV(OCIE0A);
-    usingInterrupt = false;
-  }
-}
-
 // Set GPSECHO to 'false' to turn off echoing the GPS data to the Serial console
 // Set to 'true' if you want to debug and listen to the raw GPS sentences
 #define GPSECHO  true
 
-// Interrupt is called once a millisecond, looks for any new GPS data, and stores it
-SIGNAL(TIMER0_COMPA_vect) {
-  char c = GPS.read();
-  // if you want to debug, this is a good time to do it!
-  if (GPSECHO)
-    if (c) UDR0 = c;  
-    // writing direct to UDR0 is much much faster than Serial.print 
-    // but only one character can be written at a time. 
-}
+//#define CC3000_TINY_DRIVER
 
 // These are the interrupt and control pins
 #define ADAFRUIT_CC3000_IRQ   3  // MUST be an interrupt pin!
@@ -62,39 +36,58 @@ SIGNAL(TIMER0_COMPA_vect) {
 Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ, ADAFRUIT_CC3000_VBAT,
                                          SPI_CLOCK_DIV2); // you can change this clock speed
 
-#define WLAN_SSID       "Maine Discovery Museum"           // cannot be longer than 32 characters!
-#define WLAN_PASS       "toomuchfun"
+#define WLAN_SSID       "Alienseed_G" //"Maine Discovery Museum"           // cannot be longer than 32 characters!
+#define WLAN_PASS       "" //"toomuchfun"
 // Security can be WLAN_SEC_UNSEC, WLAN_SEC_WEP, WLAN_SEC_WPA or WLAN_SEC_WPA2
 #define WLAN_SECURITY   WLAN_SEC_WPA2
 
-// What page to grab!
-#define WEBSITE      "www.adafruit.com"
-#define WEBPAGE      "/testwifi/index.html"
+const unsigned long connectTimeout  = 15L * 1000L; // Max time to wait for server connection
 
-/**************************************************************************/
-/*!
-    @brief  Sets up the HW and the CC3000 module (called automatically
-            on startup)
-*/
-/**************************************************************************/
+char serverName[] = "awesomesauce.me"; //"141.114.192.128";
+
+// Set the GPSRATE to the baud rate of the GPS module. Most are 4800
+// but some are 38400 or other. Check the datasheet!
+#define GPSRATE 9600
+
+// The buffer size that will hold a GPS sentence. They tend to be 80 characters long
+// so 90 is plenty.
+#define BUFFSIZ 75 // plenty big
+
+// global variables
+char buffer[BUFFSIZ];        // string buffer for the sentence
+char *parseptr;              // a character pointer for parsing
+char buffidx;                // an indexer into the buffer
+
+int truckid=-1;
 
 uint32_t ip;
 
 void setup(void)
 {
   Serial.begin(115200);
-  Serial.println(F("Hello, CC3000!\n")); 
-
-  Serial.print("Free RAM: "); Serial.println(getFreeRam(), DEC);
   
-  /* Initialise the module */
-  Serial.println(F("\nInitializing..."));
+  Serial.println(F("Hello OVT User!\n")); 
+  InitializeWireless();
+  InitializeGPS();
+ 
+ Serial.print("Free RAM: "); Serial.println(getFreeRam(), DEC);
+
+}
+
+void InitializeWireless()
+{
+   displayDriverMode();
+
+   /* Initialise the module */
+  Serial.println(F("\nInitializing Wireless..."));
   if (!cc3000.begin())
   {
-    Serial.println(F("Couldn't begin()! Check your wiring?"));
+    Serial.println(F("Couldn't initialize wireless! Check your wiring?"));
     while(1);
   }
   
+  displayMACAddress();
+
   // Optional SSID scan
   // listSSIDResults();
   
@@ -116,9 +109,9 @@ void setup(void)
 
   ip = 0;
   // Try looking up the website's IP address
-  Serial.print(WEBSITE); Serial.print(F(" -> "));
+  Serial.print(serverName); Serial.print(F(" -> "));
   while (ip == 0) {
-    if (! cc3000.getHostByName(WEBSITE, &ip)) {
+    if (! cc3000.getHostByName(serverName, &ip)) {
       Serial.println(F("Couldn't resolve!"));
     }
     delay(500);
@@ -128,32 +121,51 @@ void setup(void)
     
   /* You need to make sure to clean up after yourself or the CC3000 can freak out */
   /* the next time your try to connect ... */
-  Serial.println(F("\n\nDisconnecting"));
-  cc3000.disconnect();
- 
- 
- //---------------------------------------------
- //---------------------------------------------
- //---------------------------------------------
- //------------   GPS              -------------
- //---------------------------------------------
- //---------------------------------------------
- 
- 
- 
-   Serial.println("Adafruit GPS library basic test!");
+  //Serial.println(F("\n\nDisconnecting"));
+  //cc3000.disconnect();
+}
 
+void displayDriverMode(void)
+{
+  #ifdef CC3000_TINY_DRIVER
+    Serial.println(F("CC3000 is configure in 'Tiny' mode"));
+  #else
+    Serial.print(F("RX Buffer : "));
+    Serial.print(CC3000_RX_BUFFER_SIZE);
+    Serial.println(F(" bytes"));
+    Serial.print(F("TX Buffer : "));
+    Serial.print(CC3000_TX_BUFFER_SIZE);
+    Serial.println(F(" bytes"));
+  #endif
+}
+
+void displayMACAddress(void)
+{
+  uint8_t macAddress[6];
+  
+  if(!cc3000.getMacAddress(macAddress))
+  {
+    Serial.println(F("Unable to retrieve MAC Address!\r\n"));
+  }
+  else
+  {
+    Serial.print(F("MAC Address : "));
+    cc3000.printHex((byte*)&macAddress, 6);
+  }
+}
+
+void InitializeGPS()
+{
   // 9600 NMEA is the default baud rate for MTK - some use 4800
-  Serial.println("About to GSP Begin");
+  Serial.println("Initializing GPS");
 
-  GPS.begin(9600);
-   Serial.println("Begin'd");
+  GPS.begin(GPSRATE);
   
   // You can adjust which sentences to have the module emit, below
   
   // uncomment this line to turn on RMC (recommended minimum) and GGA (fix data) including altitude
-  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
-  Serial.println("GPS 0");
+  //GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
+  
   // uncomment this line to turn on only the "minimum recommended" data for high update rates!
   //GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY);
   // uncomment this line to turn on all the available data - for 9600 baud you'll want 1 Hz rate
@@ -163,31 +175,252 @@ void setup(void)
   // 1 Hz update rate
   //GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
   // 5 Hz update rate- for 9600 baud you'll have to set the output to RMC or RMCGGA only (see above)
-  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_5HZ);
-  Serial.println("GPS 1");
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
+  
   // 10 Hz update rate - for 9600 baud you'll have to set the output to RMC only (see above)
   //GPS.sendCommand(PMTK_SET_NMEA_UPDATE_10HZ);
 
   // Request updates on antenna status, comment out to keep quiet
   GPS.sendCommand(PGCMD_ANTENNA);
-  Serial.println("GPS 2");
-
-  // the nice thing about this code is you can have a timer0 interrupt go off
-  // every 1 millisecond, and read data from the GPS for you. that makes the
-  // loop code a heck of a lot easier!
-  useInterrupt(true);
-  Serial.println("GPS 3");
-  
-  delay(1000);
-  Serial.println("GPS 4");
-  
   
 }
+
+unsigned long last=0;
 
 void loop(void)
 {
- delay(1000);
+    char* result;
+
+	checkTruck();
+
+	result = ProcessLine();
+	if(result!=NULL)
+	{
+		if(millis() - last > 5000)
+		{
+			postToServer(result);
+			last=millis();
+		}
+	}
 }
+
+void checkTruck()
+{
+    int selection = 1984;
+
+    //if(!digitalRead(A0)) selection=2;
+    //else if(!digitalRead(A1)) selection=3;
+    //else if(!digitalRead(A2)) selection=4;
+    //else if(!digitalRead(A3)) selection=5;
+    //else if(!digitalRead(A4)) selection=6;
+    //else if(!digitalRead(A5)) selection=7;
+
+    if(selection!=truckid)
+    {
+        truckid=selection;
+        printTruck();
+    }
+}
+
+void printTruck()
+{
+	char truck[5] ;
+    sprintf(truck,"%d",truckid);
+    Serial.print("TruckID: ");
+    Serial.println(truck);
+}
+
+char* ProcessLine()
+{
+	char Time[10];
+	char Truck[5];
+	char Longitude[12];
+	char Latitude[12];
+
+	uint32_t tmp;
+
+    readline();
+
+    if (strncmp(buffer, "$GPGGA",6) == 0) {
+		Serial.println("Processing Message");
+
+        parseptr = buffer+7;
+        //$GPGGA,021928.585,4448.1422,N,06846.1962,W,6,00,50.0,15.7,M,-30.3,M,,0000*63
+
+        tmp = parsedecimal(parseptr); 
+        uint32_t hour = tmp / 10000;
+        uint32_t minute = (tmp / 100) % 100;
+        uint32_t second = tmp % 100;
+
+        sprintf(Time,"%02lu:%02lu:%02lu",hour,minute,second);
+
+        parseptr = strchr(parseptr, ',') + 1;
+
+		sprintf(Truck,"%d",truckid);
+
+        // latitude
+        uint32_t lat1;
+        uint32_t lat2;
+        readDdmmAsDeg(&parseptr,lat1,lat2);
+
+        parseptr = strchr(parseptr, ',') + 1;
+        // read latitude N/S data
+        char latdir;
+        if (parseptr[0] != ',') {
+            latdir = parseptr[0];
+        }
+        parseptr = strchr(parseptr, ',') + 1;
+
+        const char* latsgn= latdir=='N' ? "" : "-";
+
+        sprintf(Latitude,"%s%lu.%lu",latsgn,lat1,lat2);
+
+        // longitude
+        uint32_t lon1;
+        uint32_t lon2;
+        readDdmmAsDeg(&parseptr,lon1,lon2);
+
+		if(lat1==0 && lat2==0 && lon1==0 && lat2==0)
+		{
+			Serial.println("GPS Location not available.");
+			return NULL;
+		}
+
+        parseptr = strchr(parseptr, ',')+1;
+        // read longitude E/W data
+        char longdir;
+        if (parseptr[0] != ',') {
+            longdir = parseptr[0];
+        }
+
+        const char* lonsgn= longdir=='E' ? "" : "-";
+
+        sprintf(Longitude,"%s%lu.%lu",lonsgn,lon1,lon2);
+
+        // pos fix ind: dump it
+        parseptr = strchr(parseptr, ',')+1;
+        tmp = parsedecimal(parseptr); 
+
+        parseptr = strchr(parseptr, ',')+1;
+        uint32_t numsats = parsedecimal(parseptr); 
+        //sprintf(Sats,"%lu",numsats);
+
+		sprintf(buffer,"{\"Time\": \"%s\",\"Truck\": \"%s\",\"Lat\": \"%s\", \"Lon\": \"%s\"}",Time,Truck,Latitude,Longitude);
+        Serial.println(buffer);
+        return buffer;
+    }
+	return NULL;
+}
+
+void readDdmmAsDeg(char** parseptr, uint32_t &deg, uint32_t &dec)
+{
+    uint32_t first = parsedecimal(*parseptr);
+    if (first != 0) {
+        deg=first/100;
+        dec = (first % 100) * 10000;
+        *parseptr = strchr(*parseptr, '.')+1;
+        dec += parsedecimal(*parseptr);
+        dec = (dec * 10) / 6;
+    }
+    else
+    {
+        deg=0;
+        dec=0;
+    }
+    return;
+}
+
+void postToServer(char* DataString){
+  
+ unsigned long startTime, t = 0L;
+
+ char cLength[5]="";
+
+ int stringLength = 0;
+  while(1){
+    if(DataString[stringLength] == 0){
+      break;
+    }
+    stringLength++;
+  }
+
+  sprintf(cLength, "%u",stringLength);
+
+  Serial.print("Posting ");
+  Serial.print(stringLength);
+  Serial.println( " bytes...");
+
+  Serial.print("Connecting to ");
+  cc3000.printIPdotsRev(ip);
+  Serial.println("...");
+
+  Adafruit_CC3000_Client client;
+  startTime = millis();
+    do {
+      client = cc3000.connectTCP(ip,80); Serial.print('.');
+    } while((!client.connected()) &&
+		((millis() - startTime) < connectTimeout));
+
+  if(client.connected()){ 
+    Serial.println("Making HTTP POST");
+    client.fastrprint(F("POST /post.php HTTP/1.0\r\n"));
+    client.fastrprint(F("Host: "));
+    client.fastrprint(serverName);
+    client.fastrprint(F("\r\nContent-Type: application/json\r\n"));
+    client.fastrprint(F("Content-Length: "));
+    client.fastrprint(cLength);
+    client.fastrprint(F("\r\n\r\n"));
+    client.fastrprint(DataString);
+
+	delay(1000);
+
+    client.close();
+  } else {
+    Serial.println("Error Connecting");  
+  }
+}
+
+uint32_t parsedecimal(char *str) {
+    uint32_t d = 0;
+
+    while (str[0] != 0) {
+        if ((str[0] > '9') || (str[0] < '0'))
+            return d;
+        d *= 10;
+        d += str[0] - '0';
+        str++;
+    }
+    return d;
+}
+
+void readline(void) {
+    char c;
+
+    buffidx = 0; // start at begninning
+    while (1) {
+        c=GPS.read();
+        OnChar(c);
+		if (buffidx == 0 && c != '$')
+            continue;
+        else if (c == -1)
+            continue;
+        if (c == '\n')
+            continue;
+        if ((buffidx == BUFFSIZ-1) || (c == '\r')) {
+            buffer[buffidx] = 0;
+            return;
+        }
+        buffer[buffidx++]= c;
+    }
+}
+
+void OnChar(char c)
+{
+	if(GPSECHO)
+		Serial.print(c);
+}
+
+
 
 /**************************************************************************/
 /*!
@@ -248,4 +481,3 @@ bool displayConnectionDetails(void)
     return true;
   }
 }
-
